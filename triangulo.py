@@ -70,28 +70,47 @@ def get_html_result(base, altura):
 
     
 class CustomBaseHTTPRequestHandler(BaseHTTPRequestHandler):
+    """Clase que crea un RequestHandler personalizado que hereda de BaseHTTPRequestHandler para gestionar los GET y POST al servidor.
 
-    def write_html(self, file_html):
+    Args:
+        BaseHTTPRequestHandler (class): clase de la que hereda
+    """
+
+    def write_html(self, html_content):
+        """Envía un html para que se muestre en el navegador.
+
+        Args:
+            html_content (str): html en formato str
+        """
+        # Código 200 significa que todo ha ido correcto
         self.send_response(200)
+        # Enviamos en la cabezera el tipo de contenido que ser enviará en el cuerpo. En este caso de tipo html
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        self.wfile.write(bytes(file_html, 'utf-8'))
+        # Escribimos el contenido del cuerpo, codificando en utf-8 para que se muestren los acentos.
+        self.wfile.write(bytes(html_content, 'utf-8'))
     
 
     def do_GET(self):
-        print ("I got a GET request.")
+        """Método que maneja una petición GET al servidor. 
+        Usamos la función write_html para enviar los headers y el contenido que en este caso será el formulario para calcular el área de un triángulo como respuesta.
+        """
         self.write_html(get_html_index("CM"))
         
 
     def do_POST(self):
-        print("POST request")
+        """Método que maneja una petición POST al servidor.
+        Obtenemos los valores de base y altura del formulario a través de los params y usamos write_html para enviar el html de resultado como respuesta.
+        """
+        # Obtenemos el tamaño de los headers
         content_length = int(self.headers.get('Content-Length'))
         post_data = self.rfile.read(content_length)
+        # Decodificamos los argumentos que recibimos de la misma forma que los codificamos
         params = urllib.parse.parse_qs(post_data.decode('utf-8'))
-        print(params)
+        # Obtenemos los valores del diccionario de respuesta
         base = float(params['base'][0])
         altura = float(params['altura'][0])
-
+        
         self.write_html(get_html_result(base, altura))
     
 
